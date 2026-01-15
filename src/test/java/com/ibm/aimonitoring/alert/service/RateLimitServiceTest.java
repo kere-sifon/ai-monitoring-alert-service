@@ -110,7 +110,7 @@ class RateLimitServiceTest {
     void getCooldownStatus_shouldReturnNotInCooldown_whenNoCooldown() {
         Map<String, Object> status = rateLimitService.getCooldownStatus(1L);
 
-        assertThat(status.get("inCooldown")).isEqualTo(false);
+        assertThat(status).containsEntry("inCooldown", false);
     }
 
     @Test
@@ -122,8 +122,9 @@ class RateLimitServiceTest {
 
         Map<String, Object> status = rateLimitService.getCooldownStatus(1L);
 
-        assertThat(status.get("inCooldown")).isEqualTo(true);
-        assertThat(status.get("cooldownUntil")).isNotEqualTo("");
+        assertThat(status)
+                .containsEntry("inCooldown", true)
+                .doesNotContainEntry("cooldownUntil", "");
     }
 
     @Test
@@ -148,9 +149,10 @@ class RateLimitServiceTest {
     void getConfiguration_shouldReturnAllSettings() {
         Map<String, Object> config = rateLimitService.getConfiguration();
 
-        assertThat(config).containsEntry("enabled", true);
-        assertThat(config).containsEntry("maxAlertsPerRule", 10);
-        assertThat(config).containsEntry("timeWindowMinutes", 60);
-        assertThat(config).containsEntry("cooldownMinutes", 15);
+        assertThat(config)
+                .containsEntry("enabled", true)
+                .containsEntry("maxAlertsPerRule", 10)
+                .containsEntry("timeWindowMinutes", 60)
+                .containsEntry("cooldownMinutes", 15);
     }
 }

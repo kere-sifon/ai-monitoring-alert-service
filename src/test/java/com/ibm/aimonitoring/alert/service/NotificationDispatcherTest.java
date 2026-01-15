@@ -183,9 +183,10 @@ class NotificationDispatcherTest {
 
         Map<String, Long> stats = notificationDispatcher.getChannelStatistics(1L);
 
-        assertThat(stats).containsEntry("successCount", 10L);
-        assertThat(stats).containsEntry("failureCount", 2L);
-        assertThat(stats).containsEntry("totalCount", 12L);
+        assertThat(stats)
+                .containsEntry("successCount", 10L)
+                .containsEntry("failureCount", 2L)
+                .containsEntry("totalCount", 12L);
     }
 
     @Test
