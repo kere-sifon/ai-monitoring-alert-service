@@ -182,4 +182,40 @@ class AlertRuleEngineTest {
         assertThat(result.getEvaluationDetails())
                 .anyMatch(detail -> detail.contains("Confidence check"));
     }
+
+    @Test
+    void evaluateAnomalyRules_shouldTrigger_whenServiceMatches() {
+        testRule.setServices("test-service,other-service");
+        when(alertRuleRepository.findByTypeAndEnabledTrue(RuleType.ANOMALY_DETECTION))
+                .thenReturn(List.of(testRule));
+
+        List<AlertRule> triggeredRules = alertRuleEngine.evaluateAnomalyRules(testAnomaly);
+
+        assertThat(triggeredRules).hasSize(1);
+        verify(alertService).createAlertFromAnomaly(testAnomaly, testRule);
+    }
+
+    @Test
+    void evaluateAnomalyRules_shouldTrigger_whenLogLevelMatches() {
+        testRule.setLogLevels("ERROR,WARN");
+        when(alertRuleRepository.findByTypeAndEnabledTrue(RuleType.ANOMALY_DETECTION))
+                .thenReturn(List.of(testRule));
+
+        List<AlertRule> triggeredRules = alertRuleEngine.evaluateAnomalyRules(testAnomaly);
+
+        assertThat(triggeredRules).hasSize(1);
+        verify(alertService).createAlertFromAnomaly(testAnomaly, testRule);
+    }
+
+    @Test
+    void evaluateAnomalyRules_shouldTrigger_whenNoThresholdSet() {
+        testRule.setAnomalyThreshold(null);
+        when(alertRuleRepository.findByTypeAndEnabledTrue(RuleType.ANOMALY_DETECTION))
+                .thenReturn(List.of(testRule));
+
+        List<AlertRule> triggeredRules = alertRuleEngine.evaluateAnomalyRules(testAnomaly);
+
+        assertThat(triggeredRules).hasSize(1);
+        verify(alertService).createAlertFromAnomaly(testAnomaly, testRule);
+    }
 }
