@@ -85,8 +85,9 @@ class WebhookNotificationServiceTest {
     void sendNotification_shouldSkipWhenDisabled() throws NotificationException {
         ReflectionTestUtils.setField(service, "enabled", false);
         
-        // Should not throw, just return
         service.sendNotification(testAlert, testChannel);
+        
+        assertThat(service.isEnabled()).isFalse();
     }
 
     @Test

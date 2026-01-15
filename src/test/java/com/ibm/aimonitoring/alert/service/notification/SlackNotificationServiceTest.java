@@ -86,12 +86,22 @@ class SlackNotificationServiceTest {
         ReflectionTestUtils.setField(service, "enabled", false);
         
         service.sendNotification(testAlert, testChannel);
-        // Should complete without exception
+        
+        assertThat(service.isEnabled()).isFalse();
     }
 
     @Test
     void testConnection_shouldReturnFalseWhenNoChannel() {
         testChannel.setSlackChannel(null);
+
+        boolean result = service.testConnection(testChannel);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    void testConnection_shouldReturnFalseWhenEmptyChannel() {
+        testChannel.setSlackChannel("");
 
         boolean result = service.testConnection(testChannel);
 

@@ -89,7 +89,8 @@ class EmailNotificationServiceTest {
         ReflectionTestUtils.setField(service, "enabled", false);
         
         service.sendNotification(testAlert, testChannel);
-        // Should complete without exception
+        
+        assertThat(service.isEnabled()).isFalse();
     }
 
     @Test
@@ -108,5 +109,26 @@ class EmailNotificationServiceTest {
         boolean result = service.testConnection(testChannel);
 
         assertThat(result).isFalse();
+    }
+
+    @Test
+    void sendNotification_shouldThrowWhenEmptyRecipients() {
+        testChannel.setRecipients("");
+
+        assertThatThrownBy(() -> service.sendNotification(testAlert, testChannel))
+                .isInstanceOf(NotificationException.class)
+                .hasMessageContaining("No recipients configured");
+    }
+
+    @Test
+    void sendNotification_shouldHandleAllSeverities() throws NotificationException {
+        ReflectionTestUtils.setField(service, "enabled", false);
+        
+        for (Severity severity : Severity.values()) {
+            testAlert.setSeverity(severity);
+            service.sendNotification(testAlert, testChannel);
+        }
+        
+        assertThat(Severity.values()).hasSize(5);
     }
 }
