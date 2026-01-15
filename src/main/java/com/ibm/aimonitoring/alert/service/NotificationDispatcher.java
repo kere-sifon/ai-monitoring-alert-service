@@ -31,10 +31,6 @@ public class NotificationDispatcher {
     private static final String NO_SERVICE_FOR_CHANNEL_TYPE = "No service found for channel type: ";
 
     private final NotificationChannelRepository channelRepository;
-    private final EmailNotificationService emailService;
-    private final SlackNotificationService slackService;
-    private final WebhookNotificationService webhookService;
-
     private final Map<ChannelType, NotificationService> serviceMap;
 
     public NotificationDispatcher(
@@ -43,9 +39,6 @@ public class NotificationDispatcher {
             SlackNotificationService slackService,
             WebhookNotificationService webhookService) {
         this.channelRepository = channelRepository;
-        this.emailService = emailService;
-        this.slackService = slackService;
-        this.webhookService = webhookService;
         
         // Initialize service map
         this.serviceMap = Map.of(
