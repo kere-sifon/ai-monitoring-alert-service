@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * REST controller for managing notification channels.
@@ -103,7 +102,7 @@ public class NotificationChannelController {
         List<NotificationChannel> channels = channelRepository.findByEnabledTrue();
         List<NotificationChannelDTO> dtos = channels.stream()
                 .map(this::toDTO)
-                .collect(Collectors.toList());
+                .toList();
         
         return ResponseEntity.ok(dtos);
     }
@@ -118,7 +117,7 @@ public class NotificationChannelController {
         List<NotificationChannel> channels = channelRepository.findByType(type);
         List<NotificationChannelDTO> dtos = channels.stream()
                 .map(this::toDTO)
-                .collect(Collectors.toList());
+                .toList();
         
         return ResponseEntity.ok(dtos);
     }
@@ -133,7 +132,7 @@ public class NotificationChannelController {
         List<NotificationChannel> channels = channelRepository.findByAlertRuleId(ruleId);
         List<NotificationChannelDTO> dtos = channels.stream()
                 .map(this::toDTO)
-                .collect(Collectors.toList());
+                .toList();
         
         return ResponseEntity.ok(dtos);
     }

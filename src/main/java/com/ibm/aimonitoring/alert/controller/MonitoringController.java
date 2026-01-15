@@ -27,6 +27,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class MonitoringController {
 
+    private static final String TIMESTAMP = "timestamp";
+
     private final AlertRepository alertRepository;
     private final AlertRuleRepository alertRuleRepository;
     private final NotificationChannelRepository channelRepository;
@@ -190,7 +192,7 @@ public class MonitoringController {
         }
         
         trend.put("hourly_counts", hourlyCounts);
-        trend.put("timestamp", now);
+        trend.put(TIMESTAMP, now);
         trend.put("period_hours", 24);
         
         return ResponseEntity.ok(trend);
@@ -217,7 +219,7 @@ public class MonitoringController {
         metrics.put("high_confidence_anomalies", highConfidenceAnomalies);
         metrics.put("unprocessed_anomalies", unprocessedAnomalies);
         metrics.put("period_hours", hours);
-        metrics.put("timestamp", LocalDateTime.now());
+        metrics.put(TIMESTAMP, LocalDateTime.now());
         
         return ResponseEntity.ok(metrics);
     }
@@ -244,7 +246,7 @@ public class MonitoringController {
         statistics.put("email_channels", emailChannels);
         statistics.put("slack_channels", slackChannels);
         statistics.put("webhook_channels", webhookChannels);
-        statistics.put("timestamp", LocalDateTime.now());
+        statistics.put(TIMESTAMP, LocalDateTime.now());
         
         return ResponseEntity.ok(statistics);
     }
@@ -271,7 +273,7 @@ public class MonitoringController {
         statistics.put("anomaly_detection_rules", anomalyRules);
         statistics.put("threshold_rules", thresholdRules);
         statistics.put("pattern_match_rules", patternRules);
-        statistics.put("timestamp", LocalDateTime.now());
+        statistics.put(TIMESTAMP, LocalDateTime.now());
         
         return ResponseEntity.ok(statistics);
     }

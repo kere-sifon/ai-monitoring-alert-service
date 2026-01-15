@@ -37,6 +37,7 @@ public class EmailNotificationService implements NotificationService {
 
     private static final DateTimeFormatter DATE_FORMATTER = 
         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final String DIV_CLOSE = "</div>";
 
     @Override
     public boolean isEnabled() {
@@ -112,59 +113,59 @@ public class EmailNotificationService implements NotificationService {
         html.append("<div class='header'>");
         html.append("<h2>").append(alert.getSeverity()).append(" Alert</h2>");
         html.append("<h3>").append(alert.getTitle()).append("</h3>");
-        html.append("</div>");
+        html.append(DIV_CLOSE);
         
         html.append("<div class='content'>");
         
         html.append("<div class='field'>");
         html.append("<span class='label'>Alert Rule:</span> ");
         html.append("<span class='value'>").append(alert.getAlertRule().getName()).append("</span>");
-        html.append("</div>");
+        html.append(DIV_CLOSE);
         
         html.append("<div class='field'>");
         html.append("<span class='label'>Severity:</span> ");
         html.append("<span class='value'>").append(alert.getSeverity()).append("</span>");
-        html.append("</div>");
+        html.append(DIV_CLOSE);
         
         html.append("<div class='field'>");
         html.append("<span class='label'>Status:</span> ");
         html.append("<span class='value'>").append(alert.getStatus()).append("</span>");
-        html.append("</div>");
+        html.append(DIV_CLOSE);
         
         if (alert.getService() != null) {
             html.append("<div class='field'>");
             html.append("<span class='label'>Service:</span> ");
             html.append("<span class='value'>").append(alert.getService()).append("</span>");
-            html.append("</div>");
+            html.append(DIV_CLOSE);
         }
         
         html.append("<div class='field'>");
         html.append("<span class='label'>Created At:</span> ");
         html.append("<span class='value'>").append(alert.getCreatedAt().format(DATE_FORMATTER)).append("</span>");
-        html.append("</div>");
+        html.append(DIV_CLOSE);
         
         if (alert.getDescription() != null && !alert.getDescription().isEmpty()) {
             html.append("<div class='field'>");
             html.append("<span class='label'>Description:</span><br>");
             html.append("<span class='value'>").append(alert.getDescription()).append("</span>");
-            html.append("</div>");
+            html.append(DIV_CLOSE);
         }
         
         if (alert.getAnomalyDetectionId() != null) {
             html.append("<div class='field'>");
             html.append("<span class='label'>Anomaly Detection ID:</span> ");
             html.append("<span class='value'>").append(alert.getAnomalyDetectionId()).append("</span>");
-            html.append("</div>");
+            html.append(DIV_CLOSE);
         }
         
-        html.append("</div>");
+        html.append(DIV_CLOSE);
         
         html.append("<div class='footer'>");
         html.append("<p>This is an automated alert from the AI Log Monitoring System.</p>");
         html.append("<p>Alert ID: ").append(alert.getId()).append("</p>");
-        html.append("</div>");
+        html.append(DIV_CLOSE);
         
-        html.append("</div>");
+        html.append(DIV_CLOSE);
         html.append("</body></html>");
         
         return html.toString();

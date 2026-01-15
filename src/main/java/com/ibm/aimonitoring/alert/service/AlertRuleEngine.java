@@ -74,23 +74,19 @@ public class AlertRuleEngine {
         }
 
         // Check service filter
-        if (rule.getServices() != null && !rule.getServices().isEmpty()) {
-            if (anomaly.getService() == null || 
-                !rule.getServices().contains(anomaly.getService())) {
-                log.debug("Service {} not in rule service list for rule {}", 
-                    anomaly.getService(), rule.getName());
-                return false;
-            }
+        if (rule.getServices() != null && !rule.getServices().isEmpty() &&
+            (anomaly.getService() == null || !rule.getServices().contains(anomaly.getService()))) {
+            log.debug("Service {} not in rule service list for rule {}", 
+                anomaly.getService(), rule.getName());
+            return false;
         }
 
         // Check log level filter
-        if (rule.getLogLevels() != null && !rule.getLogLevels().isEmpty()) {
-            if (anomaly.getLevel() == null || 
-                !rule.getLogLevels().contains(anomaly.getLevel())) {
-                log.debug("Log level {} not in rule level list for rule {}", 
-                    anomaly.getLevel(), rule.getName());
-                return false;
-            }
+        if (rule.getLogLevels() != null && !rule.getLogLevels().isEmpty() &&
+            (anomaly.getLevel() == null || !rule.getLogLevels().contains(anomaly.getLevel()))) {
+            log.debug("Log level {} not in rule level list for rule {}", 
+                anomaly.getLevel(), rule.getName());
+            return false;
         }
 
         return true;
