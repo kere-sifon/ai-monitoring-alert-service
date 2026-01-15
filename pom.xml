@@ -23,6 +23,7 @@
         <spring-cloud.version>2023.0.0</spring-cloud.version>
         <sonar.organization>keresifon</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.projectKey>keresifon_ai-monitoring-alert-service</sonar.projectKey>
         <sonar.coverage.jacoco.xmlReportPaths>
             ${project.build.directory}/site/jacoco/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
