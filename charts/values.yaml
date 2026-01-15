@@ -1,0 +1,58 @@
+replicaCount: 2
+
+image:
+  repository: ghcr.io/OWNER/ai-monitoring-alert-service
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+service:
+  type: ClusterIP
+  port: 8083
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+env:
+  SPRING_PROFILES_ACTIVE: kubernetes
+
+database:
+  host: postgres
+  port: 5432
+  name: ai_monitoring
+  schema: alert_service
+
+elasticsearch:
+  host: elasticsearch
+  port: 9200
+
+secrets:
+  dbUsername: ""
+  dbPassword: ""
+
+livenessProbe:
+  httpGet:
+    path: /actuator/health/liveness
+    port: http
+  initialDelaySeconds: 60
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 5

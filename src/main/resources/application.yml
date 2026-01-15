@@ -1,0 +1,149 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: alert-service
+  
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:ai_monitoring}
+    username: ${DB_USER:admin}
+    password: ${DB_PASSWORD:admin123}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+  
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        default_schema: alert_service
+  
+  mail:
+    host: ${SMTP_HOST:smtp.gmail.com}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+    default-encoding: UTF-8
+  
+  task:
+    execution:
+      pool:
+        core-size: 5
+        max-size: 10
+        queue-capacity: 100
+    scheduling:
+      pool:
+        size: 5
+
+# Eureka Client Configuration
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka/}
+    enabled: ${EUREKA_ENABLED:false}
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 30
+
+# Management and Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  health:
+    mail:
+      enabled: false  # Disable mail health check to prevent service from being unhealthy when SMTP is not configured
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# Logging
+logging:
+  level:
+    com.ibm.aimonitoring: DEBUG
+    org.springframework.web: INFO
+    org.springframework.mail: DEBUG
+    org.hibernate.SQL: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+# Alert Service Configuration
+alert:
+  # Anomaly monitoring configuration
+  monitoring:
+    enabled: true
+    interval: 60000  # Check every 60 seconds
+    lookback-minutes: 5  # Look back 5 minutes for new anomalies
+    batch-size: 100  # Process up to 100 anomalies per batch
+  
+  # Notification configuration
+  notification:
+    retry:
+      max-attempts: 3
+      backoff-delay: 2000  # 2 seconds
+    timeout: 10000  # 10 seconds
+    
+    # Email configuration
+    email:
+      enabled: ${EMAIL_ENABLED:true}
+      from: ${EMAIL_FROM:noreply@aimonitoring.com}
+      from-name: AI Monitoring System
+    
+    # Slack configuration
+    slack:
+      enabled: ${SLACK_ENABLED:true}
+      default-channel: ${SLACK_DEFAULT_CHANNEL:#alerts}
+      timeout: 5000
+    
+    # Webhook configuration
+    webhook:
+      enabled: ${WEBHOOK_ENABLED:true}
+      timeout: 10000
+      retry-on-failure: true
+  
+  # Alert rule defaults
+  rules:
+    default-severity: MEDIUM
+    default-enabled: true
+    anomaly-confidence-threshold: 0.7  # Trigger alerts for anomalies with confidence > 0.7
+  
+  # Rate limiting to prevent alert storms
+  rate-limit:
+    enabled: true
+    max-alerts-per-rule: 10  # Max 10 alerts per rule
+    time-window-minutes: 60  # Within 60 minutes
+    cooldown-minutes: 15  # Cooldown period after hitting limit
+
+# Database connection for anomaly detections (from log-processor)
+anomaly-detection:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:ai_monitoring}
+    username: ${DB_USER:admin}
+    password: ${DB_PASSWORD:admin123}
+    schema: ml_service
+
+# Made with Bob
