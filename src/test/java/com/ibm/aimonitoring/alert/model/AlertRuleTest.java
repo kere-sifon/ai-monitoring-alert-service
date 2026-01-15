@@ -32,4 +32,12 @@ class AlertRuleTest {
         assertThat(alertRule.getTriggerCount()).isEqualTo(2L);
     }
 
+    @Test
+    void builder_shouldSetDefaultTriggerCount() {
+        AlertRule newRule = AlertRule.builder()
+                .name("New Rule")
+                .build();
+
+        assertThat(newRule.getTriggerCount()).isEqualTo(0L);
+    }
 }

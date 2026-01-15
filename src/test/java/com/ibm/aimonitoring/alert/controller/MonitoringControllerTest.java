@@ -169,4 +169,23 @@ class MonitoringControllerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
+
+    @Test
+    void getAlertStatistics_shouldUseDefaultHoursWhenNull() {
+        when(alertRepository.countByStatus(any())).thenReturn(10L);
+        when(alertRepository.countBySeverity(any())).thenReturn(5L);
+        when(alertRepository.countByCreatedAtAfter(any())).thenReturn(25L);
+        when(alertRepository.count()).thenReturn(100L);
+        when(anomalyDetectionRepository.count()).thenReturn(200L);
+        when(anomalyDetectionRepository.countByDetectedAtAfter(any())).thenReturn(50L);
+        when(anomalyDetectionRepository.countUnprocessedAnomalies()).thenReturn(10L);
+        when(alertRuleRepository.count()).thenReturn(15L);
+        when(alertRuleRepository.countByEnabledTrue()).thenReturn(12L);
+        when(channelRepository.count()).thenReturn(8L);
+        when(channelRepository.countByEnabledTrue()).thenReturn(6L);
+
+        ResponseEntity<?> response = monitoringController.getAlertStatistics(null);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
 }

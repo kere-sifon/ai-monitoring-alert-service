@@ -83,4 +83,14 @@ class AlertTest {
         assertThat(alert.isAcknowledged()).isFalse();
         assertThat(alert.isResolved()).isTrue();
     }
+
+    @Test
+    void builder_shouldSetDefaultValues() {
+        Alert newAlert = Alert.builder()
+                .title("Test")
+                .build();
+
+        assertThat(newAlert.getNotificationSent()).isFalse();
+        assertThat(newAlert.getNotificationFailureCount()).isEqualTo(0);
+    }
 }
