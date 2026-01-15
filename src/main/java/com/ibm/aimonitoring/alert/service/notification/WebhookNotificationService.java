@@ -83,7 +83,7 @@ public class WebhookNotificationService implements NotificationService {
                 );
             }
             
-            String response = request
+            request
                 .timeout(Duration.ofMillis(timeout))
                 .block();
 

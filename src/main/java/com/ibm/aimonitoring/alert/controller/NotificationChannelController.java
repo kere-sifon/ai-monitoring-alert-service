@@ -238,15 +238,8 @@ public class NotificationChannelController {
         return channelRepository.findById(id)
                 .map(channel -> {
                     try {
-                        String testMessage = request != null && request.getMessage() != null 
-                                ? request.getMessage() 
-                                : "This is a test notification from AI Monitoring System";
-                        
-                        // Create a test alert for notification
-                        String subject = "Test Notification - " + channel.getName();
-                        
                         // Send test notification based on channel type
-                        boolean success = sendTestNotification(channel, subject, testMessage);
+                        boolean success = sendTestNotification(channel);
                         
                         if (success) {
                             channel.setLastSuccessAt(LocalDateTime.now());
@@ -287,16 +280,11 @@ public class NotificationChannelController {
     /**
      * Send test notification
      */
-    private boolean sendTestNotification(NotificationChannel channel, String subject, String message) {
-        try {
-            // Use the notification dispatcher to send test notification
-            // This is a simplified version - in production, you'd create a proper test alert
-            log.info("Sending test notification via {} channel: {}", channel.getType(), channel.getName());
-            return true; // Simplified for now
-        } catch (Exception e) {
-            log.error("Failed to send test notification: {}", e.getMessage(), e);
-            return false;
-        }
+    private boolean sendTestNotification(NotificationChannel channel) {
+        // Use the notification dispatcher to send test notification
+        // This is a simplified version - in production, you'd create a proper test alert
+        log.info("Sending test notification via {} channel: {}", channel.getType(), channel.getName());
+        return true; // Simplified for now
     }
 
     /**

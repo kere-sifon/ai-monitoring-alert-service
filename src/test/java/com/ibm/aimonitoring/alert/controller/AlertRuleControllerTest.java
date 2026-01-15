@@ -12,9 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -157,7 +154,7 @@ class AlertRuleControllerTest {
         mockMvc.perform(post("/api/v1/alert-rules/1/enable"))
                 .andExpect(status().isOk());
 
-        verify(alertRuleRepository).save(argThat(rule -> rule.getEnabled()));
+        verify(alertRuleRepository).save(argThat(AlertRule::getEnabled));
     }
 
     @Test

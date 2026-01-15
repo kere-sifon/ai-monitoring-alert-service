@@ -154,18 +154,19 @@ public class AnomalyMonitoringScheduler {
                     criticalAnomalies.size());
                 
                 // Process critical anomalies with priority
-                for (AnomalyDetection anomaly : criticalAnomalies) {
-                    try {
-                        alertRuleEngine.evaluateAnomalyRules(anomaly);
-                    } catch (Exception e) {
-                        log.error("Error processing critical anomaly {}", 
-                            anomaly.getLogId(), e);
-                    }
-                }
+                criticalAnomalies.forEach(this::processCriticalAnomaly);
             }
             
         } catch (Exception e) {
             log.error("Error during critical anomaly monitoring", e);
+        }
+    }
+
+    private void processCriticalAnomaly(AnomalyDetection anomaly) {
+        try {
+            alertRuleEngine.evaluateAnomalyRules(anomaly);
+        } catch (Exception e) {
+            log.error("Error processing critical anomaly {}", anomaly.getLogId(), e);
         }
     }
 

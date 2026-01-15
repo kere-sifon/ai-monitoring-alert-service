@@ -59,7 +59,7 @@ public class AlertService {
             .status(AlertStatus.OPEN)
             .severity(alertRule.getSeverity())
             .title(buildAlertTitle(anomaly, alertRule))
-            .description(buildAlertDescription(anomaly, alertRule))
+            .description(buildAlertDescription(anomaly))
             .anomalyDetectionId(anomaly.getLogId())
             .logId(anomaly.getLogId())
             .service(anomaly.getService())
@@ -296,7 +296,7 @@ public class AlertService {
         );
     }
 
-    private String buildAlertDescription(AnomalyDetection anomaly, AlertRule alertRule) {
+    private String buildAlertDescription(AnomalyDetection anomaly) {
         StringBuilder desc = new StringBuilder();
         desc.append("An anomaly was detected by the ML service.\n\n");
         desc.append(String.format("Confidence: %.2f%%\n", anomaly.getConfidence() * 100));

@@ -65,7 +65,7 @@ public class SlackNotificationService implements NotificationService {
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
 
-            String response = webClient.post()
+            webClient.post()
                 .bodyValue(payload)
                 .retrieve()
                 .bodyToMono(String.class)
