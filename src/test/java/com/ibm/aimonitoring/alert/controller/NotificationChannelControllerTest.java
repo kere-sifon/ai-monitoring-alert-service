@@ -133,4 +133,40 @@ class NotificationChannelControllerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
+
+    @Test
+    void testChannel_shouldReturn404WhenNotFound() {
+        when(channelRepository.findById(999L)).thenReturn(Optional.empty());
+
+        ResponseEntity<?> response = controller.testChannel(999L, null);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void enableChannel_shouldReturn404WhenNotFound() {
+        when(channelRepository.findById(999L)).thenReturn(Optional.empty());
+
+        ResponseEntity<?> response = controller.enableChannel(999L);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void disableChannel_shouldReturn404WhenNotFound() {
+        when(channelRepository.findById(999L)).thenReturn(Optional.empty());
+
+        ResponseEntity<?> response = controller.disableChannel(999L);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void getChannelsByRule_shouldReturnList() {
+        when(channelRepository.findByAlertRuleId(1L)).thenReturn(List.of(testChannel));
+
+        ResponseEntity<?> response = controller.getChannelsByRule(1L);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
 }

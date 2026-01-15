@@ -107,4 +107,13 @@ class SlackNotificationServiceTest {
 
         assertThat(result).isFalse();
     }
+
+    @Test
+    void sendNotification_shouldThrowWhenEmptySlackChannel() {
+        testChannel.setSlackChannel("");
+
+        assertThatThrownBy(() -> service.sendNotification(testAlert, testChannel))
+                .isInstanceOf(NotificationException.class)
+                .hasMessageContaining("No Slack webhook URL configured");
+    }
 }

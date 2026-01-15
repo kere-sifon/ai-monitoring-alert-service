@@ -98,4 +98,22 @@ class WebhookNotificationServiceTest {
 
         assertThat(result).isFalse();
     }
+
+    @Test
+    void testConnection_shouldReturnFalseWhenEmptyUrl() {
+        testChannel.setWebhookUrl("");
+
+        boolean result = service.testConnection(testChannel);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    void sendNotification_shouldThrowWhenEmptyWebhookUrl() {
+        testChannel.setWebhookUrl("");
+
+        assertThatThrownBy(() -> service.sendNotification(testAlert, testChannel))
+                .isInstanceOf(NotificationException.class)
+                .hasMessageContaining("No webhook URL configured");
+    }
 }
