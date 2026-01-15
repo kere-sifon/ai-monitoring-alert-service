@@ -38,7 +38,7 @@ public class SlackNotificationService implements NotificationService {
 
     private static final DateTimeFormatter DATE_FORMATTER = 
         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private static final String MRKDWN = MRKDWN;
+    private static final String MRKDWN = "mrkdwn";
 
     @Override
     public boolean isEnabled() {
