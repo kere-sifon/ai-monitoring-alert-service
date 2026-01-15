@@ -38,6 +38,7 @@ public class SlackNotificationService implements NotificationService {
 
     private static final DateTimeFormatter DATE_FORMATTER = 
         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final String MRKDWN = MRKDWN;
 
     @Override
     public boolean isEnabled() {
@@ -110,7 +111,7 @@ public class SlackNotificationService implements NotificationService {
             Map.of(
                 "type", "section",
                 "text", Map.of(
-                    "type", "mrkdwn",
+                    "type", MRKDWN,
                     "text", String.format("*%s*\n%s", 
                         alert.getTitle(),
                         alert.getDescription() != null ? alert.getDescription() : ""
@@ -126,34 +127,34 @@ public class SlackNotificationService implements NotificationService {
                 "type", "section",
                 "fields", new Object[] {
                     Map.of(
-                        "type", "mrkdwn",
+                        "type", MRKDWN,
                         "text", String.format("*Alert Rule:*\n%s", alert.getAlertRule().getName())
                     ),
                     Map.of(
-                        "type", "mrkdwn",
+                        "type", MRKDWN,
                         "text", String.format("*Severity:*\n%s %s", 
                             getSeverityEmoji(alert), 
                             alert.getSeverity()
                         )
                     ),
                     Map.of(
-                        "type", "mrkdwn",
+                        "type", MRKDWN,
                         "text", String.format("*Status:*\n%s", alert.getStatus())
                     ),
                     Map.of(
-                        "type", "mrkdwn",
+                        "type", MRKDWN,
                         "text", String.format("*Service:*\n%s", 
                             alert.getService() != null ? alert.getService() : "N/A"
                         )
                     ),
                     Map.of(
-                        "type", "mrkdwn",
+                        "type", MRKDWN,
                         "text", String.format("*Created:*\n%s", 
                             alert.getCreatedAt().format(DATE_FORMATTER)
                         )
                     ),
                     Map.of(
-                        "type", "mrkdwn",
+                        "type", MRKDWN,
                         "text", String.format("*Alert ID:*\n%s", alert.getId())
                     )
                 }
@@ -164,7 +165,7 @@ public class SlackNotificationService implements NotificationService {
                 "type", "context",
                 "elements", new Object[] {
                     Map.of(
-                        "type", "mrkdwn",
+                        "type", MRKDWN,
                         "text", "AI Log Monitoring System"
                     )
                 }
