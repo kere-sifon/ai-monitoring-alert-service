@@ -8,7 +8,7 @@ spring:
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:ai_monitoring}
     username: ${DB_USER:admin}
-    password: ${DB_PASSWORD:admin123}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
@@ -143,7 +143,7 @@ anomaly-detection:
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:ai_monitoring}
     username: ${DB_USER:admin}
-    password: ${DB_PASSWORD:admin123}
+    password: ${DB_PASSWORD}
     schema: ml_service
 
 # Made with Bob
