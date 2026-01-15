@@ -13,13 +13,17 @@ import org.springframework.web.client.RestTemplate;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(properties = {
-    "spring.datasource.url=jdbc:postgresql://localhost:5432/aimonitoring",
-    "spring.datasource.username=postgres",
-    "spring.datasource.password=postgres",
+    "spring.datasource.url=jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE",
+    "spring.datasource.driver-class-name=org.h2.Driver",
+    "spring.datasource.username=sa",
+    "spring.datasource.password=",
     "spring.jpa.hibernate.ddl-auto=create-drop",
-    "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect",
+    "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect",
+    "spring.jpa.properties.hibernate.default_schema=PUBLIC",
     "spring.mail.host=localhost",
-    "spring.mail.port=1025"
+    "spring.mail.port=1025",
+    "eureka.client.enabled=false",
+    "alert.monitoring.enabled=false"
 })
 class AlertServiceApplicationTests {
 
