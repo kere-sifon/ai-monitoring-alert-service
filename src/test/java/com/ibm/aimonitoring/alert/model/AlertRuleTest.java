@@ -38,6 +38,6 @@ class AlertRuleTest {
                 .name("New Rule")
                 .build();
 
-        assertThat(newRule.getTriggerCount()).isEqualTo(0L);
+        assertThat(newRule.getTriggerCount()).isZero();
     }
 }

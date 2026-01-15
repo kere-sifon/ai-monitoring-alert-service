@@ -91,6 +91,6 @@ class AlertTest {
                 .build();
 
         assertThat(newAlert.getNotificationSent()).isFalse();
-        assertThat(newAlert.getNotificationFailureCount()).isEqualTo(0);
+        assertThat(newAlert.getNotificationFailureCount()).isZero();
     }
 }

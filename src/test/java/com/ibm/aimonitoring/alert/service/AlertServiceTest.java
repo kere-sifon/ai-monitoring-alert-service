@@ -393,6 +393,66 @@ class AlertServiceTest {
         verify(notificationDispatcher, never()).sendNotifications(any(Alert.class));
     }
 
+    @Test
+    void shouldCreateAlertFromAnomalyWithNullService() {
+        // Arrange
+        com.ibm.aimonitoring.alert.model.AnomalyDetection anomaly = 
+            com.ibm.aimonitoring.alert.model.AnomalyDetection.builder()
+                .logId("log-123")
+                .confidence(0.95)
+                .anomalyScore(0.9)
+                .service(null)
+                .message(null)
+                .level(null)
+                .detectedAt(LocalDateTime.now())
+                .build();
+
+        when(rateLimitService.isAlertAllowed(any(AlertRule.class))).thenReturn(true);
+        when(alertRepository.save(any(Alert.class))).thenAnswer(invocation -> {
+            Alert a = invocation.getArgument(0);
+            a.setId(1L);
+            return a;
+        });
+        when(alertRuleRepository.save(any(AlertRule.class))).thenReturn(testAlertRule);
+
+        // Act
+        Alert result = alertService.createAlertFromAnomaly(anomaly, testAlertRule);
+
+        // Assert
+        assertThat(result).isNotNull();
+        verify(alertRepository).save(any(Alert.class));
+    }
+
+    @Test
+    void shouldCreateAlertFromAnomalyWithAllFields() {
+        // Arrange
+        com.ibm.aimonitoring.alert.model.AnomalyDetection anomaly = 
+            com.ibm.aimonitoring.alert.model.AnomalyDetection.builder()
+                .logId("log-123")
+                .confidence(0.95)
+                .anomalyScore(0.9)
+                .service("payment-service")
+                .message("Error processing payment")
+                .level("ERROR")
+                .detectedAt(LocalDateTime.now())
+                .build();
+
+        when(rateLimitService.isAlertAllowed(any(AlertRule.class))).thenReturn(true);
+        when(alertRepository.save(any(Alert.class))).thenAnswer(invocation -> {
+            Alert a = invocation.getArgument(0);
+            a.setId(1L);
+            return a;
+        });
+        when(alertRuleRepository.save(any(AlertRule.class))).thenReturn(testAlertRule);
+
+        // Act
+        Alert result = alertService.createAlertFromAnomaly(anomaly, testAlertRule);
+
+        // Assert
+        assertThat(result).isNotNull();
+        assertThat(result.getService()).isEqualTo("payment-service");
+    }
+
 }
 
 // Made with Bob

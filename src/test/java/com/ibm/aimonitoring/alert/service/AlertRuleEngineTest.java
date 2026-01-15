@@ -218,4 +218,37 @@ class AlertRuleEngineTest {
         assertThat(triggeredRules).hasSize(1);
         verify(alertService).createAlertFromAnomaly(testAnomaly, testRule);
     }
+
+    @Test
+    void evaluateAnomalyRules_shouldNotTrigger_whenServiceNotNull_andNoMatch() {
+        testRule.setServices("other-service");
+        testAnomaly.setService(null);
+        when(alertRuleRepository.findByTypeAndEnabledTrue(RuleType.ANOMALY_DETECTION))
+                .thenReturn(List.of(testRule));
+
+        List<AlertRule> triggeredRules = alertRuleEngine.evaluateAnomalyRules(testAnomaly);
+
+        assertThat(triggeredRules).isEmpty();
+    }
+
+    @Test
+    void evaluateAnomalyRules_shouldNotTrigger_whenLogLevelNotNull_andNoMatch() {
+        testRule.setLogLevels("WARN");
+        testAnomaly.setLevel(null);
+        when(alertRuleRepository.findByTypeAndEnabledTrue(RuleType.ANOMALY_DETECTION))
+                .thenReturn(List.of(testRule));
+
+        List<AlertRule> triggeredRules = alertRuleEngine.evaluateAnomalyRules(testAnomaly);
+
+        assertThat(triggeredRules).isEmpty();
+    }
+
+    @Test
+    void testRule_shouldReturnNotTriggered_whenNotAnomaly() {
+        testAnomaly.setIsAnomaly(false);
+
+        AlertRuleEngine.RuleEvaluationResult result = alertRuleEngine.testRule(testRule, testAnomaly);
+
+        assertThat(result.isTriggered()).isFalse();
+    }
 }

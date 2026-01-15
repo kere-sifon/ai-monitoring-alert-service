@@ -182,4 +182,36 @@ class AnomalyMonitoringSchedulerTest {
         // Should only process 2 anomalies due to batch size limit
         verify(alertRuleEngine, times(2)).evaluateAnomalyRules(any(AnomalyDetection.class));
     }
+
+    @Test
+    void monitorCriticalAnomalies_shouldHandleException() {
+        when(anomalyDetectionRepository.findCriticalAnomalies(anyDouble(), anyDouble(), any(LocalDateTime.class)))
+                .thenThrow(new RuntimeException("Database error"));
+
+        scheduler.monitorCriticalAnomalies();
+
+        verify(anomalyDetectionRepository).findCriticalAnomalies(anyDouble(), anyDouble(), any(LocalDateTime.class));
+    }
+
+    @Test
+    void monitorCriticalAnomalies_shouldHandleEmptyList() {
+        when(anomalyDetectionRepository.findCriticalAnomalies(anyDouble(), anyDouble(), any(LocalDateTime.class)))
+                .thenReturn(Collections.emptyList());
+
+        scheduler.monitorCriticalAnomalies();
+
+        verifyNoInteractions(alertRuleEngine);
+    }
+
+    @Test
+    void monitorAnomalies_shouldHandleExceptionInProcessing() {
+        when(anomalyDetectionRepository.findUnprocessedAnomalies(any(LocalDateTime.class)))
+                .thenReturn(List.of(testAnomaly));
+        when(alertRuleEngine.evaluateAnomalyRules(any(AnomalyDetection.class)))
+                .thenThrow(new RuntimeException("Processing error"));
+
+        scheduler.monitorAnomalies();
+
+        verify(alertRuleEngine).evaluateAnomalyRules(testAnomaly);
+    }
 }
