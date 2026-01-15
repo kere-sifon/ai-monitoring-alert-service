@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -39,6 +41,9 @@ class AlertServiceTest {
 
     @Mock
     private AlertRuleRepository alertRuleRepository;
+
+    @Mock
+    private RateLimitService rateLimitService;
 
     @Mock
     private NotificationDispatcher notificationDispatcher;
@@ -277,6 +282,115 @@ class AlertServiceTest {
         assertTrue(result.containsKey("false_positive") || result.containsKey("falsePositive"));
         verify(alertRepository, times(1)).count();
         verify(alertRepository, times(4)).countByStatus(any(AlertStatus.class));
+    }
+
+    @Test
+    void shouldCreateAlertFromAnomaly() {
+        // Arrange
+        com.ibm.aimonitoring.alert.model.AnomalyDetection anomaly = 
+            com.ibm.aimonitoring.alert.model.AnomalyDetection.builder()
+                .logId("log-123")
+                .confidence(0.95)
+                .anomalyScore(0.9)
+                .service("test-service")
+                .message("Test message")
+                .level("ERROR")
+                .detectedAt(LocalDateTime.now())
+                .build();
+
+        when(rateLimitService.isAlertAllowed(any(AlertRule.class))).thenReturn(true);
+        when(alertRepository.save(any(Alert.class))).thenAnswer(invocation -> {
+            Alert a = invocation.getArgument(0);
+            a.setId(1L);
+            return a;
+        });
+        when(alertRuleRepository.save(any(AlertRule.class))).thenReturn(testAlertRule);
+
+        // Act
+        Alert result = alertService.createAlertFromAnomaly(anomaly, testAlertRule);
+
+        // Assert
+        assertThat(result).isNotNull();
+        assertThat(result.getStatus()).isEqualTo(AlertStatus.OPEN);
+        verify(alertRepository).save(any(Alert.class));
+        verify(alertRuleRepository).save(testAlertRule);
+        verify(notificationDispatcher).sendNotifications(any(Alert.class));
+    }
+
+    @Test
+    void shouldBlockAlertCreationWhenRateLimited() {
+        // Arrange
+        com.ibm.aimonitoring.alert.model.AnomalyDetection anomaly = 
+            com.ibm.aimonitoring.alert.model.AnomalyDetection.builder()
+                .logId("log-123")
+                .confidence(0.95)
+                .build();
+
+        when(rateLimitService.isAlertAllowed(any(AlertRule.class))).thenReturn(false);
+
+        // Act
+        Alert result = alertService.createAlertFromAnomaly(anomaly, testAlertRule);
+
+        // Assert
+        assertThat(result).isNull();
+        verify(alertRepository, never()).save(any(Alert.class));
+    }
+
+    @Test
+    void shouldCreateManualAlert() {
+        // Arrange
+        when(alertRepository.save(any(Alert.class))).thenAnswer(invocation -> {
+            Alert a = invocation.getArgument(0);
+            a.setId(1L);
+            return a;
+        });
+        when(alertRuleRepository.save(any(AlertRule.class))).thenReturn(testAlertRule);
+
+        // Act
+        Alert result = alertService.createManualAlert(testAlertRule, "Manual Alert", "Description", "service");
+
+        // Assert
+        assertThat(result).isNotNull();
+        assertThat(result.getTitle()).isEqualTo("Manual Alert");
+        verify(alertRepository).save(any(Alert.class));
+        verify(notificationDispatcher).sendNotifications(any(Alert.class));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenAcknowledgingNonOpenAlert() {
+        // Arrange
+        testAlert.setStatus(AlertStatus.RESOLVED);
+        when(alertRepository.findById(1L)).thenReturn(Optional.of(testAlert));
+
+        // Act & Assert
+        assertThatThrownBy(() -> alertService.acknowledgeAlert(1L, "admin"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Only OPEN alerts can be acknowledged");
+    }
+
+    @Test
+    void shouldThrowExceptionWhenResolvingAlreadyResolvedAlert() {
+        // Arrange
+        testAlert.setStatus(AlertStatus.RESOLVED);
+        when(alertRepository.findById(1L)).thenReturn(Optional.of(testAlert));
+
+        // Act & Assert
+        assertThatThrownBy(() -> alertService.resolveAlert(1L, "admin", "notes"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("already resolved");
+    }
+
+    @Test
+    void shouldNotRetryNotificationsWhenAlreadySent() {
+        // Arrange
+        testAlert.setNotificationSent(true);
+        when(alertRepository.findById(1L)).thenReturn(Optional.of(testAlert));
+
+        // Act
+        alertService.retryNotifications(1L);
+
+        // Assert
+        verify(notificationDispatcher, never()).sendNotifications(any(Alert.class));
     }
 
 }
