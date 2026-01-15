@@ -14,7 +14,8 @@ import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class EmailNotificationServiceTest {
@@ -130,5 +131,97 @@ class EmailNotificationServiceTest {
         }
         
         assertThat(Severity.values()).hasSize(5);
+    }
+
+    @Test
+    void sendNotification_shouldSendToMultipleRecipients() throws Exception {
+        testChannel.setRecipients("test1@example.com,test2@example.com");
+        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+        doNothing().when(mailSender).send(any(MimeMessage.class));
+
+        service.sendNotification(testAlert, testChannel);
+
+        verify(mailSender, times(2)).send(any(MimeMessage.class));
+    }
+
+    @Test
+    void sendNotification_shouldThrowOnMailException() {
+        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+        doThrow(new org.springframework.mail.MailSendException("SMTP error"))
+                .when(mailSender).send(any(MimeMessage.class));
+
+        assertThatThrownBy(() -> service.sendNotification(testAlert, testChannel))
+                .isInstanceOf(NotificationException.class)
+                .hasMessageContaining("Failed to send email");
+    }
+
+    @Test
+    void sendNotification_shouldHandleAlertWithNullService() throws Exception {
+        testAlert.setService(null);
+        testAlert.setDescription(null);
+        testAlert.setAnomalyDetectionId(null);
+        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+        doNothing().when(mailSender).send(any(MimeMessage.class));
+
+        service.sendNotification(testAlert, testChannel);
+
+        verify(mailSender).send(any(MimeMessage.class));
+    }
+
+    @Test
+    void sendNotification_shouldHandleAlertWithAllFields() throws Exception {
+        testAlert.setService("payment-service");
+        testAlert.setDescription("Detailed description");
+        testAlert.setAnomalyDetectionId("anomaly-123");
+        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+        doNothing().when(mailSender).send(any(MimeMessage.class));
+
+        service.sendNotification(testAlert, testChannel);
+
+        verify(mailSender).send(any(MimeMessage.class));
+    }
+
+    @Test
+    void sendNotification_shouldHandleCriticalSeverity() throws Exception {
+        testAlert.setSeverity(Severity.CRITICAL);
+        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+        doNothing().when(mailSender).send(any(MimeMessage.class));
+
+        service.sendNotification(testAlert, testChannel);
+
+        verify(mailSender).send(any(MimeMessage.class));
+    }
+
+    @Test
+    void sendNotification_shouldHandleMediumSeverity() throws Exception {
+        testAlert.setSeverity(Severity.MEDIUM);
+        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+        doNothing().when(mailSender).send(any(MimeMessage.class));
+
+        service.sendNotification(testAlert, testChannel);
+
+        verify(mailSender).send(any(MimeMessage.class));
+    }
+
+    @Test
+    void sendNotification_shouldHandleLowSeverity() throws Exception {
+        testAlert.setSeverity(Severity.LOW);
+        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+        doNothing().when(mailSender).send(any(MimeMessage.class));
+
+        service.sendNotification(testAlert, testChannel);
+
+        verify(mailSender).send(any(MimeMessage.class));
+    }
+
+    @Test
+    void sendNotification_shouldHandleInfoSeverity() throws Exception {
+        testAlert.setSeverity(Severity.INFO);
+        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+        doNothing().when(mailSender).send(any(MimeMessage.class));
+
+        service.sendNotification(testAlert, testChannel);
+
+        verify(mailSender).send(any(MimeMessage.class));
     }
 }

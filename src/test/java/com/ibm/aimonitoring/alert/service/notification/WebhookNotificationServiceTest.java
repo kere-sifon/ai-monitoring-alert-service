@@ -116,4 +116,28 @@ class WebhookNotificationServiceTest {
                 .isInstanceOf(NotificationException.class)
                 .hasMessageContaining("No webhook URL configured");
     }
+
+    @Test
+    void sendNotification_shouldHandleAlertWithContext() throws NotificationException {
+        ReflectionTestUtils.setField(service, "enabled", false);
+        testAlert.setContext("{\"key\": \"value\"}");
+        testAlert.setAnomalyDetectionId("anomaly-123");
+        testAlert.setLogId("log-456");
+
+        service.sendNotification(testAlert, testChannel);
+
+        assertThat(service.isEnabled()).isFalse();
+    }
+
+    @Test
+    void sendNotification_shouldHandleAlertWithoutOptionalFields() throws NotificationException {
+        ReflectionTestUtils.setField(service, "enabled", false);
+        testAlert.setService(null);
+        testAlert.setAnomalyDetectionId(null);
+        testAlert.setContext(null);
+
+        service.sendNotification(testAlert, testChannel);
+
+        assertThat(service.isEnabled()).isFalse();
+    }
 }

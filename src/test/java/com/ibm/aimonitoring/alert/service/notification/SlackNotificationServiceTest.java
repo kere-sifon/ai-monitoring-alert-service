@@ -116,4 +116,27 @@ class SlackNotificationServiceTest {
                 .isInstanceOf(NotificationException.class)
                 .hasMessageContaining("No Slack webhook URL configured");
     }
+
+    @Test
+    void sendNotification_shouldHandleAllSeverities() throws NotificationException {
+        ReflectionTestUtils.setField(service, "enabled", false);
+        
+        for (Severity severity : Severity.values()) {
+            testAlert.setSeverity(severity);
+            service.sendNotification(testAlert, testChannel);
+        }
+        
+        assertThat(Severity.values()).hasSize(5);
+    }
+
+    @Test
+    void sendNotification_shouldHandleNullDescription() throws NotificationException {
+        ReflectionTestUtils.setField(service, "enabled", false);
+        testAlert.setDescription(null);
+        testAlert.setService(null);
+
+        service.sendNotification(testAlert, testChannel);
+
+        assertThat(service.isEnabled()).isFalse();
+    }
 }
