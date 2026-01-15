@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * REST controller for managing alert rules.
@@ -109,7 +108,7 @@ public class AlertRuleController {
         List<AlertRule> rules = alertRuleRepository.findByEnabledTrue();
         List<AlertRuleDTO> dtos = rules.stream()
                 .map(this::toDTO)
-                .collect(Collectors.toList());
+                .toList();
         
         return ResponseEntity.ok(dtos);
     }
@@ -124,7 +123,7 @@ public class AlertRuleController {
         List<AlertRule> rules = alertRuleRepository.findByType(type);
         List<AlertRuleDTO> dtos = rules.stream()
                 .map(this::toDTO)
-                .collect(Collectors.toList());
+                .toList();
         
         return ResponseEntity.ok(dtos);
     }
@@ -139,7 +138,7 @@ public class AlertRuleController {
         List<AlertRule> rules = alertRuleRepository.findBySeverity(severity);
         List<AlertRuleDTO> dtos = rules.stream()
                 .map(this::toDTO)
-                .collect(Collectors.toList());
+                .toList();
         
         return ResponseEntity.ok(dtos);
     }
@@ -154,7 +153,7 @@ public class AlertRuleController {
         List<AlertRule> rules = alertRuleRepository.findByServiceName(serviceName);
         List<AlertRuleDTO> dtos = rules.stream()
                 .map(this::toDTO)
-                .collect(Collectors.toList());
+                .toList();
         
         return ResponseEntity.ok(dtos);
     }
