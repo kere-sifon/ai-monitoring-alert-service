@@ -67,12 +67,10 @@ public class AlertRuleEngine {
         }
 
         // Check confidence threshold
-        if (rule.getAnomalyThreshold() != null) {
-            if (anomaly.getConfidence() < rule.getAnomalyThreshold()) {
-                log.debug("Anomaly confidence {} below threshold {} for rule {}", 
-                    anomaly.getConfidence(), rule.getAnomalyThreshold(), rule.getName());
-                return false;
-            }
+        if (rule.getAnomalyThreshold() != null && anomaly.getConfidence() < rule.getAnomalyThreshold()) {
+            log.debug("Anomaly confidence {} below threshold {} for rule {}", 
+                anomaly.getConfidence(), rule.getAnomalyThreshold(), rule.getName());
+            return false;
         }
 
         // Check service filter

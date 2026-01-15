@@ -171,43 +171,7 @@ public class AlertRuleController {
         
         return alertRuleRepository.findById(id)
                 .map(rule -> {
-                    if (request.getName() != null) {
-                        rule.setName(request.getName());
-                    }
-                    if (request.getDescription() != null) {
-                        rule.setDescription(request.getDescription());
-                    }
-                    if (request.getType() != null) {
-                        rule.setType(request.getType());
-                    }
-                    if (request.getSeverity() != null) {
-                        rule.setSeverity(request.getSeverity());
-                    }
-                    if (request.getAnomalyThreshold() != null) {
-                        rule.setAnomalyThreshold(request.getAnomalyThreshold());
-                    }
-                    if (request.getConditions() != null) {
-                        rule.setConditions(request.getConditions());
-                    }
-                    if (request.getServiceName() != null) {
-                        rule.setServiceName(request.getServiceName());
-                    }
-                    if (request.getLogLevel() != null) {
-                        rule.setLogLevel(request.getLogLevel());
-                    }
-                    if (request.getTimeWindowMinutes() != null) {
-                        rule.setTimeWindowMinutes(request.getTimeWindowMinutes());
-                    }
-                    if (request.getThreshold() != null) {
-                        rule.setThreshold(request.getThreshold());
-                    }
-                    if (request.getCooldownMinutes() != null) {
-                        rule.setCooldownMinutes(request.getCooldownMinutes());
-                    }
-                    if (request.getNotifyOnRecovery() != null) {
-                        rule.setNotifyOnRecovery(request.getNotifyOnRecovery());
-                    }
-                    
+                    applyUpdates(rule, request);
                     rule.setUpdatedAt(LocalDateTime.now());
                     
                     AlertRule updated = alertRuleRepository.save(rule);
@@ -216,6 +180,24 @@ public class AlertRuleController {
                     return ResponseEntity.ok(toDTO(updated));
                 })
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    /**
+     * Apply non-null fields from request to the alert rule
+     */
+    private void applyUpdates(AlertRule rule, UpdateAlertRuleRequest request) {
+        java.util.Optional.ofNullable(request.getName()).ifPresent(rule::setName);
+        java.util.Optional.ofNullable(request.getDescription()).ifPresent(rule::setDescription);
+        java.util.Optional.ofNullable(request.getType()).ifPresent(rule::setType);
+        java.util.Optional.ofNullable(request.getSeverity()).ifPresent(rule::setSeverity);
+        java.util.Optional.ofNullable(request.getAnomalyThreshold()).ifPresent(rule::setAnomalyThreshold);
+        java.util.Optional.ofNullable(request.getConditions()).ifPresent(rule::setConditions);
+        java.util.Optional.ofNullable(request.getServiceName()).ifPresent(rule::setServiceName);
+        java.util.Optional.ofNullable(request.getLogLevel()).ifPresent(rule::setLogLevel);
+        java.util.Optional.ofNullable(request.getTimeWindowMinutes()).ifPresent(rule::setTimeWindowMinutes);
+        java.util.Optional.ofNullable(request.getThreshold()).ifPresent(rule::setThreshold);
+        java.util.Optional.ofNullable(request.getCooldownMinutes()).ifPresent(rule::setCooldownMinutes);
+        java.util.Optional.ofNullable(request.getNotifyOnRecovery()).ifPresent(rule::setNotifyOnRecovery);
     }
 
     /**

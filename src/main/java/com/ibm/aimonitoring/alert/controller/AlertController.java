@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Alert Controller
@@ -34,6 +33,8 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "*")
 public class AlertController {
 
+    private static final String CREATED_AT = CREATED_AT;
+    
     private final AlertService alertService;
 
     /**
@@ -80,7 +81,7 @@ public class AlertController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, CREATED_AT));
         Page<Alert> alerts = alertService.getAlertsByStatus(status, pageable);
         Page<AlertDTO> alertDTOs = alerts.map(this::convertToDTO);
         
@@ -97,7 +98,7 @@ public class AlertController {
         List<Alert> alerts = alertService.getOpenAlerts();
         List<AlertDTO> alertDTOs = alerts.stream()
             .map(this::convertToDTO)
-            .collect(Collectors.toList());
+            .toList();
         
         return ResponseEntity.ok(alertDTOs);
     }
@@ -116,7 +117,7 @@ public class AlertController {
         List<Alert> alerts = alertService.getRecentAlerts(minutes, pageable);
         List<AlertDTO> alertDTOs = alerts.stream()
             .map(this::convertToDTO)
-            .collect(Collectors.toList());
+            .toList();
         
         return ResponseEntity.ok(alertDTOs);
     }
@@ -132,7 +133,7 @@ public class AlertController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, CREATED_AT));
         Page<Alert> alerts = alertService.getAlertsByService(service, pageable);
         Page<AlertDTO> alertDTOs = alerts.map(this::convertToDTO);
         
@@ -217,7 +218,7 @@ public class AlertController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, CREATED_AT));
         Page<Alert> alerts = alertService.getAllAlerts(pageable);
         
         // Filter by severity (could be optimized with a repository method)
