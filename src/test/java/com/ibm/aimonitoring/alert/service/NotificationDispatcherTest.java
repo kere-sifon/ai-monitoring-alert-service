@@ -69,7 +69,7 @@ class NotificationDispatcherTest {
                 .type(ChannelType.EMAIL)
                 .enabled(true)
                 .alertRule(testRule)
-                .emailRecipients("test@example.com")
+                .recipients("test@example.com")
                 .successCount(0L)
                 .failureCount(0L)
                 .build();
@@ -101,7 +101,7 @@ class NotificationDispatcherTest {
     }
 
     @Test
-    void sendNotifications_shouldHandleNoChannels() {
+    void sendNotifications_shouldHandleNoChannels() throws NotificationException {
         when(channelRepository.findByAlertRuleIdAndEnabledTrue(1L))
                 .thenReturn(List.of());
 
@@ -127,15 +127,14 @@ class NotificationDispatcherTest {
     }
 
     @Test
-    void sendNotification_shouldThrowException_whenNoServiceForType() {
-        NotificationChannel unknownChannel = NotificationChannel.builder()
-                .id(3L)
-                .type(null)
-                .build();
+    void sendNotification_shouldThrowException_whenServiceFails() throws NotificationException {
+        // Test that exceptions from services are propagated
+        when(emailService.isEnabled()).thenReturn(true);
+        doThrow(new NotificationException("Test failure")).when(emailService).sendNotification(any(), any());
 
-        assertThatThrownBy(() -> notificationDispatcher.sendNotification(testAlert, unknownChannel))
+        assertThatThrownBy(() -> notificationDispatcher.sendNotification(testAlert, emailChannel))
                 .isInstanceOf(NotificationException.class)
-                .hasMessageContaining("No service found");
+                .hasMessageContaining("Test failure");
     }
 
     @Test
@@ -167,12 +166,11 @@ class NotificationDispatcherTest {
     }
 
     @Test
-    void testChannel_shouldReturnFalse_whenNoServiceFound() {
-        NotificationChannel unknownChannel = NotificationChannel.builder()
-                .type(null)
-                .build();
+    void testChannel_shouldReturnFalse_whenTestFails() {
+        when(emailService.isEnabled()).thenReturn(true);
+        when(emailService.testConnection(emailChannel)).thenReturn(false);
 
-        boolean result = notificationDispatcher.testChannel(unknownChannel);
+        boolean result = notificationDispatcher.testChannel(emailChannel);
 
         assertThat(result).isFalse();
     }

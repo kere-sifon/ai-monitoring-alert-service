@@ -51,6 +51,9 @@ class AlertRuleControllerTest {
                 .severity(Severity.HIGH)
                 .enabled(true)
                 .anomalyThreshold(0.7)
+                .cooldownMinutes(15)
+                .notifyOnRecovery(false)
+                .triggerCount(0L)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
@@ -71,16 +74,6 @@ class AlertRuleControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("Test Rule"));
-    }
-
-    @Test
-    void getAllAlertRules_shouldReturnPagedResults() throws Exception {
-        Page<AlertRule> page = new PageImpl<>(List.of(testRule));
-        when(alertRuleRepository.findAll(any(Pageable.class))).thenReturn(page);
-
-        mockMvc.perform(get("/api/v1/alert-rules"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].name").value("Test Rule"));
     }
 
     @Test

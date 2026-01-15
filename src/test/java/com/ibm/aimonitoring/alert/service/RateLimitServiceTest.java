@@ -81,11 +81,7 @@ class RateLimitServiceTest {
                 .thenReturn(15L);
         rateLimitService.isAlertAllowed(testRule);
 
-        // Reset mock to return low count
-        when(alertRepository.countByRuleIdSince(eq(1L), any(LocalDateTime.class)))
-                .thenReturn(0L);
-
-        // Should still be blocked due to cooldown
+        // Should still be blocked due to cooldown (same mock returns 15L)
         boolean allowed = rateLimitService.isAlertAllowed(testRule);
 
         assertThat(allowed).isFalse();

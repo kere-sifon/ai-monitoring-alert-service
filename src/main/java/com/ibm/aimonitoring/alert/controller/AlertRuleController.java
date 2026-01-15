@@ -283,7 +283,7 @@ public class AlertRuleController {
                 .description(rule.getDescription())
                 .type(rule.getType())
                 .severity(rule.getSeverity())
-                .enabled(rule.getEnabled())
+                .enabled(Boolean.TRUE.equals(rule.getEnabled()))
                 .anomalyThreshold(rule.getAnomalyThreshold())
                 .conditions(rule.getConditions())
                 .serviceName(rule.getServiceName())
@@ -291,7 +291,7 @@ public class AlertRuleController {
                 .timeWindowMinutes(rule.getTimeWindowMinutes())
                 .threshold(rule.getThreshold())
                 .cooldownMinutes(rule.getCooldownMinutes())
-                .notifyOnRecovery(rule.getNotifyOnRecovery())
+                .notifyOnRecovery(Boolean.TRUE.equals(rule.getNotifyOnRecovery()))
                 .createdAt(rule.getCreatedAt())
                 .updatedAt(rule.getUpdatedAt())
                 .build();
