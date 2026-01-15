@@ -33,7 +33,7 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class AlertController {
 
-    private static final String CREATED_AT = CREATED_AT;
+    private static final String CREATED_AT = "createdAt";
     
     private final AlertService alertService;
 
