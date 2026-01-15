@@ -30,7 +30,6 @@ import java.util.Map;
 @RequestMapping("/api/v1/alerts")
 @Slf4j
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class AlertController {
 
     private static final String CREATED_AT = "createdAt";
