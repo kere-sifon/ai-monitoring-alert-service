@@ -13,9 +13,10 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  # Runs on develop, main, PRs, and tags
+  # Runs on develop, main, and PRs (NOT on tags)
   build-and-test:
     runs-on: ubuntu-latest
+    if: "!startsWith(github.ref, 'refs/tags/')"
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -49,9 +50,9 @@ jobs:
 
   # Builds Docker image on develop (with sha) or version tags (with semver)
   docker-build:
-    needs: build-and-test
+    needs: [build-and-test]
+    if: always() && (github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/tags/v')) && github.event_name == 'push' && (needs.build-and-test.result == 'success' || needs.build-and-test.result == 'skipped')
     runs-on: ubuntu-latest
-    if: (github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/tags/v')) && github.event_name == 'push'
     permissions:
       contents: read
       packages: write
