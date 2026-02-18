@@ -29,6 +29,8 @@
         <logback.version>1.5.25</logback.version>
         <tomcat.version>10.1.52</tomcat.version>
         <reactor-netty.version>1.2.8</reactor-netty.version>
+        <guava.version>33.4.0-jre</guava.version>
+        <httpclient.version>4.5.14</httpclient.version>
         <sonar.organization>keresifon</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.projectKey>keresifon_ai-monitoring-alert-service</sonar.projectKey>
@@ -85,6 +87,18 @@
                 <version>${netty.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <!-- Override guava to fix CVE-2023-2976, CVE-2018-10237, CVE-2020-8908 (transitive from Eureka client) -->
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+            <!-- Override httpclient to fix CVE-2020-13956 (transitive from Eureka client) -->
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${httpclient.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
