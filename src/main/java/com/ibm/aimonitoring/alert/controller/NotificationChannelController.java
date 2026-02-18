@@ -271,7 +271,7 @@ public class NotificationChannelController {
                         channelRepository.save(channel);
                         
                         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                .body("Error testing channel: " + e.getMessage());
+                                .body("Error testing channel: an internal error occurred");
                     }
                 })
                 .orElse(ResponseEntity.notFound().build());
