@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,7 @@ class NotificationChannelControllerTest {
     private NotificationDispatcher notificationDispatcher;
 
     @InjectMocks
+    @Spy
     private NotificationChannelController controller;
 
     private NotificationChannel testChannel;
@@ -141,6 +143,19 @@ class NotificationChannelControllerTest {
         ResponseEntity<?> response = controller.testChannel(999L, null);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void testChannel_shouldReturn500WhenSendFails() throws Exception {
+        when(channelRepository.findById(1L)).thenReturn(Optional.of(testChannel));
+        when(channelRepository.save(any(NotificationChannel.class))).thenReturn(testChannel);
+        doReturn(false).when(controller).sendTestNotification(any(NotificationChannel.class));
+
+        ResponseEntity<?> response = controller.testChannel(1L, null);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat((String) response.getBody()).contains("Failed to send test notification");
+        verify(channelRepository).save(any(NotificationChannel.class));
     }
 
     @Test

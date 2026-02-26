@@ -280,7 +280,7 @@ public class NotificationChannelController {
     /**
      * Send test notification
      */
-    private boolean sendTestNotification(NotificationChannel channel) {
+    protected boolean sendTestNotification(NotificationChannel channel) {
         // Use the notification dispatcher to send test notification
         // This is a simplified version - in production, you'd create a proper test alert
         log.info("Sending test notification via {} channel: {}", channel.getType(), channel.getName());
