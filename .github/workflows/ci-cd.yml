@@ -261,6 +261,15 @@ jobs:
         run: |
           kubectl create namespace ai-monitoring --dry-run=client -o yaml | kubectl apply -f -
 
+      - name: Ensure ai-monitoring-secrets exists
+        run: |
+          if ! kubectl get secret ai-monitoring-secrets -n ai-monitoring 2>/dev/null; then
+            echo "::error::Secret ai-monitoring-secrets not found. Run install-dependencies.sh first:"
+            echo "  DB_PASSWORD='<secure-password>' ./deployments/install-dependencies.sh"
+            exit 1
+          fi
+          echo "Secret ai-monitoring-secrets exists."
+
       - name: Clear stuck Helm release (if any)
         run: |
           # Resolve "another operation is in progress" from interrupted previous deploy
