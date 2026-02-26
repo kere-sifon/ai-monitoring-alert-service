@@ -10,7 +10,8 @@ nameOverride: ""
 fullnameOverride: ""
 
 serviceAccount:
-  create: true
+  # Use default SA (chart has no serviceaccount template). Set create+template if custom SA needed.
+  create: false
   annotations: {}
   name: ""
 
@@ -47,12 +48,16 @@ livenessProbe:
   httpGet:
     path: /actuator/health/liveness
     port: http
-  initialDelaySeconds: 60
-  periodSeconds: 10
+  initialDelaySeconds: 90
+  periodSeconds: 15
+  timeoutSeconds: 10
+  failureThreshold: 5
 
 readinessProbe:
   httpGet:
     path: /actuator/health/readiness
     port: http
-  initialDelaySeconds: 30
-  periodSeconds: 5
+  initialDelaySeconds: 60
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 6

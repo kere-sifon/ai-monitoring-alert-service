@@ -2,8 +2,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "alert-service.fullname" . }}
+  namespace: ai-monitoring
   labels:
     {{- include "alert-service.labels" . | nindent 4 }}
+    tier: backend
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -13,6 +15,7 @@ spec:
     metadata:
       labels:
         {{- include "alert-service.selectorLabels" . | nindent 8 }}
+        tier: backend
     spec:
       serviceAccountName: {{ include "alert-service.serviceAccountName" . }}
       containers:
