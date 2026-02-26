@@ -271,7 +271,7 @@ public class NotificationChannelController {
                         channelRepository.save(channel);
                         
                         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                .body("Error testing channel: " + e.getMessage());
+                                .body("Error testing channel: an internal error occurred");
                     }
                 })
                 .orElse(ResponseEntity.notFound().build());
@@ -280,7 +280,7 @@ public class NotificationChannelController {
     /**
      * Send test notification
      */
-    private boolean sendTestNotification(NotificationChannel channel) {
+    protected boolean sendTestNotification(NotificationChannel channel) {
         // Use the notification dispatcher to send test notification
         // This is a simplified version - in production, you'd create a proper test alert
         log.info("Sending test notification via {} channel: {}", channel.getType(), channel.getName());

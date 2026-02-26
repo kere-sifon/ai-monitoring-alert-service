@@ -1,5 +1,7 @@
 package com.ibm.aimonitoring.alert.controller;
 
+import com.ibm.aimonitoring.alert.dto.CreateChannelRequest;
+import com.ibm.aimonitoring.alert.dto.UpdateChannelRequest;
 import com.ibm.aimonitoring.alert.model.ChannelType;
 import com.ibm.aimonitoring.alert.model.NotificationChannel;
 import com.ibm.aimonitoring.alert.repository.NotificationChannelRepository;
@@ -9,7 +11,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -30,6 +37,7 @@ class NotificationChannelControllerTest {
     private NotificationDispatcher notificationDispatcher;
 
     @InjectMocks
+    @Spy
     private NotificationChannelController controller;
 
     private NotificationChannel testChannel;
@@ -144,6 +152,31 @@ class NotificationChannelControllerTest {
     }
 
     @Test
+    void testChannel_shouldReturn500WhenSendFails() throws Exception {
+        when(channelRepository.findById(1L)).thenReturn(Optional.of(testChannel));
+        when(channelRepository.save(any(NotificationChannel.class))).thenReturn(testChannel);
+        doReturn(false).when(controller).sendTestNotification(any(NotificationChannel.class));
+
+        ResponseEntity<?> response = controller.testChannel(1L, null);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat((String) response.getBody()).contains("Failed to send test notification");
+        verify(channelRepository).save(any(NotificationChannel.class));
+    }
+
+    @Test
+    void testChannel_shouldReturn500WhenExceptionOccurs() throws Exception {
+        when(channelRepository.findById(1L)).thenReturn(Optional.of(testChannel));
+        when(channelRepository.save(any(NotificationChannel.class))).thenReturn(testChannel);
+        doThrow(new RuntimeException("Simulated failure")).when(controller).sendTestNotification(any(NotificationChannel.class));
+
+        ResponseEntity<?> response = controller.testChannel(1L, null);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat((String) response.getBody()).contains("internal error occurred");
+    }
+
+    @Test
     void enableChannel_shouldReturn404WhenNotFound() {
         when(channelRepository.findById(999L)).thenReturn(Optional.empty());
 
@@ -168,5 +201,65 @@ class NotificationChannelControllerTest {
         ResponseEntity<?> response = controller.getChannelsByRule(1L);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void createChannel_shouldReturn201() {
+        CreateChannelRequest request = CreateChannelRequest.builder()
+                .type(ChannelType.EMAIL)
+                .name("New Channel")
+                .configuration("{}")
+                .enabled(true)
+                .build();
+        when(channelRepository.save(any(NotificationChannel.class))).thenReturn(testChannel);
+
+        ResponseEntity<?> response = controller.createChannel(request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        verify(channelRepository).save(any(NotificationChannel.class));
+    }
+
+    @Test
+    void getAllChannels_shouldReturnPagedResult() {
+        Page<NotificationChannel> page = new PageImpl<>(List.of(testChannel));
+        when(channelRepository.findAll(any(Pageable.class))).thenReturn(page);
+
+        ResponseEntity<?> response = controller.getAllChannels(0, 20, "createdAt", "DESC");
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void getAllChannels_shouldSupportAscendingSort() {
+        Page<NotificationChannel> page = new PageImpl<>(List.of(testChannel));
+        when(channelRepository.findAll(any(Pageable.class))).thenReturn(page);
+
+        ResponseEntity<?> response = controller.getAllChannels(0, 10, "name", "ASC");
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void updateChannel_shouldReturn200() {
+        UpdateChannelRequest request = UpdateChannelRequest.builder()
+                .name("Updated Name")
+                .build();
+        when(channelRepository.findById(1L)).thenReturn(Optional.of(testChannel));
+        when(channelRepository.save(any(NotificationChannel.class))).thenReturn(testChannel);
+
+        ResponseEntity<?> response = controller.updateChannel(1L, request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        verify(channelRepository).save(any(NotificationChannel.class));
+    }
+
+    @Test
+    void updateChannel_shouldReturn404WhenNotFound() {
+        UpdateChannelRequest request = UpdateChannelRequest.builder().name("Updated").build();
+        when(channelRepository.findById(999L)).thenReturn(Optional.empty());
+
+        ResponseEntity<?> response = controller.updateChannel(999L, request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 }
