@@ -29,22 +29,36 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: {{ .Values.env.SPRING_PROFILES_ACTIVE | quote }}
-            - name: DB_URL
-              value: "jdbc:postgresql://{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}?currentSchema={{ .Values.database.schema }}"
-            - name: ELASTICSEARCH_HOST
-              value: {{ .Values.elasticsearch.host | quote }}
-            - name: ELASTICSEARCH_PORT
-              value: {{ .Values.elasticsearch.port | quote }}
-            - name: DB_USERNAME
+            - name: DB_HOST
+              value: {{ .Values.database.host | quote }}
+            - name: DB_PORT
+              value: {{ .Values.database.port | quote }}
+            - name: DB_NAME
+              value: {{ .Values.database.name | quote }}
+            - name: DB_USER
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "alert-service.fullname" . }}-secrets
+                  name: {{ .Values.secrets.commonSecretName }}
                   key: db-username
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "alert-service.fullname" . }}-secrets
+                  name: {{ .Values.secrets.commonSecretName }}
                   key: db-password
+            - name: ELASTICSEARCH_HOST
+              value: {{ .Values.elasticsearch.host | quote }}
+            - name: ELASTICSEARCH_PORT
+              value: {{ .Values.elasticsearch.port | quote }}
+            - name: ELASTICSEARCH_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.commonSecretName }}
+                  key: elasticsearch-username
+            - name: ELASTICSEARCH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.commonSecretName }}
+                  key: elasticsearch-password
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
           readinessProbe:

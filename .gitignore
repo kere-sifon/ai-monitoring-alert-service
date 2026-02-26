@@ -4,6 +4,9 @@ build/
 dist/
 node_modules/
 
+# Deployments
+deployments/
+
 # IDE
 .idea/
 .vscode/
