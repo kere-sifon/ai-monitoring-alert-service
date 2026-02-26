@@ -120,6 +120,13 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <exclusions>
+                <!-- Exclude mchange-commons-java (JNDI CVE) if pulled in via Hibernate/c3p0 path -->
+                <exclusion>
+                    <groupId>com.mchange</groupId>
+                    <artifactId>mchange-commons-java</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         
         <dependency>
@@ -192,11 +199,16 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-quartz</artifactId>
             <exclusions>
-                <!-- Exclude c3p0 to remove mchange-commons-java (JNDI arbitrary code execution CVE).
-                     Spring Boot uses HikariCP by default for Quartz datasource. -->
+                <!-- Exclude c3p0 and mchange-commons-java (JNDI arbitrary code execution CVE).
+                     Spring Boot uses HikariCP by default for Quartz datasource.
+                     mchange may also come transitively via other paths. -->
                 <exclusion>
                     <groupId>com.mchange</groupId>
                     <artifactId>c3p0</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.mchange</groupId>
+                    <artifactId>mchange-commons-java</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
