@@ -29,6 +29,8 @@ resources:
 
 env:
   SPRING_PROFILES_ACTIVE: kubernetes
+  # update = create missing tables on startup; use validate after schema is managed by migrations
+  SPRING_JPA_HIBERNATE_DDL_AUTO: update
 
 database:
   host: postgres
@@ -53,11 +55,21 @@ secrets:
   elasticsearchUsername: "elastic"
   elasticsearchPassword: ""
 
+startupProbe:
+  # Give Spring Boot up to ~3 min to start before failing
+  httpGet:
+    path: /actuator/health/liveness
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 24
+
 livenessProbe:
   httpGet:
     path: /actuator/health/liveness
     port: http
-  initialDelaySeconds: 90
+  initialDelaySeconds: 0  # startupProbe runs first
   periodSeconds: 15
   timeoutSeconds: 10
   failureThreshold: 5
