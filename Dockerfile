@@ -1,6 +1,9 @@
 # Multi-stage build for Alert Service
 FROM maven:3.9-eclipse-temurin-17-alpine AS build
 
+# Update Alpine packages to fix libpng and gnutls CVEs (Trivy alerts #5, #6, #7)
+RUN apk update && apk upgrade
+
 WORKDIR /app
 
 # Copy pom.xml and download dependencies (cached layer)
@@ -13,6 +16,9 @@ RUN mvn clean package -DskipTests
 
 # Runtime stage
 FROM eclipse-temurin:17-jre-alpine
+
+# Update Alpine packages to fix libpng and gnutls CVEs (Trivy alerts #5, #6, #7)
+RUN apk update && apk upgrade
 
 WORKDIR /app
 
