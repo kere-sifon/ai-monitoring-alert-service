@@ -399,10 +399,21 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # TLS: use org/repo secret OPENSHIFT_CA_BUNDLE (PEM) + --certificate-authority, or omit it to use --insecure-skip-tls-verify (e.g. CRC / internal CAs not in runner trust store)
       - name: Login to OpenShift
+        env:
+          OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
+          OPENSHIFT_SERVER: ${{ secrets.OPENSHIFT_SERVER }}
+          OPENSHIFT_PROJECT: ${{ secrets.OPENSHIFT_PROJECT }}
+          OPENSHIFT_CA_BUNDLE: ${{ secrets.OPENSHIFT_CA_BUNDLE }}
         run: |
-          oc login --token=${{ secrets.OPENSHIFT_TOKEN }} --server=${{ secrets.OPENSHIFT_SERVER }}
-          oc project ${{ secrets.OPENSHIFT_PROJECT }}
+          if [ -n "$OPENSHIFT_CA_BUNDLE" ]; then
+            printf '%s\n' "$OPENSHIFT_CA_BUNDLE" > /tmp/openshift-ca.crt
+            oc login --token="$OPENSHIFT_TOKEN" --server="$OPENSHIFT_SERVER" --certificate-authority=/tmp/openshift-ca.crt
+          else
+            oc login --token="$OPENSHIFT_TOKEN" --server="$OPENSHIFT_SERVER" --insecure-skip-tls-verify
+          fi
+          oc project "$OPENSHIFT_PROJECT"
 
       - name: Ensure ai-monitoring-secrets exists
         run: |
