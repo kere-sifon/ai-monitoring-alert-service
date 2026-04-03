@@ -20,6 +20,10 @@
     
     <properties>
         <java.version>17</java.version>
+        <!-- CVE-2026-22737, CVE-2026-22735: Spring WebMVC/WebFlux (script templates, SSE) -->
+        <spring-framework.version>6.2.17</spring-framework.version>
+        <!-- GHSA-72hv-8253-57qq: jackson-core async parser maxNumberLength bypass -->
+        <jackson-bom.version>2.18.6</jackson-bom.version>
         <spring-cloud.version>2024.0.0</spring-cloud.version>
         <postgresql.version>42.7.3</postgresql.version>
         <testcontainers.version>1.21.4</testcontainers.version>
