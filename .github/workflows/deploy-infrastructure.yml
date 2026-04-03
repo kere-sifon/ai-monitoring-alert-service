@@ -1,0 +1,96 @@
+# Manual install of platform dependencies (PostgreSQL, Elasticsearch, Redis, RabbitMQ)
+# via deployments/install-dependencies.sh — same Bitnami charts as local/OpenShift docs.
+#
+# Required GitHub secrets (org or repo):
+#   OPENSHIFT_TOKEN, OPENSHIFT_SERVER
+# Namespace: set via workflow input (default ai-monitoring)
+# Optional:
+#   OPENSHIFT_CA_BUNDLE — PEM; if unset, oc login uses --insecure-skip-tls-verify
+#   INFRA_DB_PASSWORD, INFRA_JWT_SECRET, INFRA_REDIS_PASSWORD, INFRA_RABBITMQ_PASSWORD
+#     — if unset, the script generates new random values (may rotate credentials on re-run)
+#
+# Runners: use "ubuntu-latest" if the API is reachable from GitHub-hosted runners.
+# Use "oc-run" (or change to your self-hosted label) for private / CRC / VPN-only APIs.
+
+name: Deploy infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      namespace:
+        description: "OpenShift/Kubernetes namespace (project)"
+        required: true
+        default: "ai-monitoring"
+        type: string
+      runner:
+        description: "GitHub runner (self-hosted if cluster API is not public)"
+        required: true
+        default: "ubuntu-latest"
+        type: choice
+        options:
+          - ubuntu-latest
+          - oc-run
+
+permissions:
+  contents: read
+
+jobs:
+  install-dependencies:
+    name: Helm install (Postgres, ES, Redis, RabbitMQ)
+    runs-on: ${{ github.event.inputs.runner }}
+    env:
+      NAMESPACE: ${{ github.event.inputs.namespace }}
+      DB_PASSWORD: ${{ secrets.INFRA_DB_PASSWORD }}
+      JWT_SECRET: ${{ secrets.INFRA_JWT_SECRET }}
+      REDIS_PASSWORD: ${{ secrets.INFRA_REDIS_PASSWORD }}
+      RABBITMQ_PASSWORD: ${{ secrets.INFRA_RABBITMQ_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install OpenShift CLI (ubuntu-hosted only)
+        if: runner.os == 'Linux' && github.event.inputs.runner == 'ubuntu-latest'
+        run: |
+          set -e
+          curl -sSL -o /tmp/oc.tgz https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz
+          sudo tar xf /tmp/oc.tgz -C /usr/local/bin oc kubectl
+          rm -f /tmp/oc.tgz
+          oc version --client
+          kubectl version --client
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.13.0
+
+      - name: Login to cluster
+        env:
+          OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
+          OPENSHIFT_SERVER: ${{ secrets.OPENSHIFT_SERVER }}
+          OPENSHIFT_CA_BUNDLE: ${{ secrets.OPENSHIFT_CA_BUNDLE }}
+        run: |
+          set -e
+          if [ -z "${OPENSHIFT_TOKEN:-}" ] || [ -z "${OPENSHIFT_SERVER:-}" ]; then
+            echo "::error::Set secrets OPENSHIFT_TOKEN and OPENSHIFT_SERVER"
+            exit 1
+          fi
+          if [ -n "${OPENSHIFT_CA_BUNDLE:-}" ]; then
+            printf '%s\n' "$OPENSHIFT_CA_BUNDLE" > /tmp/openshift-ca.crt
+            oc login --token="$OPENSHIFT_TOKEN" --server="$OPENSHIFT_SERVER" --certificate-authority=/tmp/openshift-ca.crt
+          else
+            oc login --token="$OPENSHIFT_TOKEN" --server="$OPENSHIFT_SERVER" --insecure-skip-tls-verify
+          fi
+          oc new-project "$NAMESPACE" 2>/dev/null || oc project "$NAMESPACE"
+
+      - name: Run install-dependencies.sh
+        run: |
+          set -e
+          chmod +x deployments/install-dependencies.sh
+          ./deployments/install-dependencies.sh
+
+      - name: Verify workloads
+        run: |
+          set -e
+          NS="${NAMESPACE:-ai-monitoring}"
+          oc get pods -n "$NS" -l 'app.kubernetes.io/name in (postgresql,elasticsearch,redis,rabbitmq)' 2>/dev/null || true
+          oc get pods -n "$NS"
