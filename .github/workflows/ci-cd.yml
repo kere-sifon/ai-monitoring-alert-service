@@ -340,11 +340,16 @@ jobs:
 
       - name: Clear stuck Helm release (if any)
         run: |
-          # Resolve "another operation is in progress" from interrupted previous deploy
+          # Helm blocks upgrade while status is pending-* (interrupted install/upgrade/rollback)
           if helm list -n ai-monitoring 2>/dev/null | grep -q alert-service; then
-            echo "Clearing any pending Helm operation..."
-            helm rollback alert-service -n ai-monitoring 2>/dev/null || true
-            sleep 5
+            STATUS=$(helm status alert-service -n ai-monitoring 2>/dev/null | awk '/^STATUS:/{print $2}')
+            echo "Helm release status: ${STATUS:-unknown}"
+            case "$STATUS" in
+              pending-install|pending-upgrade|pending-rollback)
+                echo "Rolling back to clear stuck operation..."
+                helm rollback alert-service -n ai-monitoring --wait --timeout 5m
+                ;;
+            esac
           fi
 
       - name: Deploy with Helm
@@ -423,9 +428,16 @@ jobs:
 
       - name: Clear stuck Helm release (if any)
         run: |
-          if helm list -n ${{ secrets.OPENSHIFT_PROJECT }} 2>/dev/null | grep -q alert-service; then
-            helm rollback alert-service -n ${{ secrets.OPENSHIFT_PROJECT }} 2>/dev/null || true
-            sleep 5
+          NS="${{ secrets.OPENSHIFT_PROJECT }}"
+          if helm list -n "$NS" 2>/dev/null | grep -q alert-service; then
+            STATUS=$(helm status alert-service -n "$NS" 2>/dev/null | awk '/^STATUS:/{print $2}')
+            echo "Helm release status: ${STATUS:-unknown}"
+            case "$STATUS" in
+              pending-install|pending-upgrade|pending-rollback)
+                echo "Rolling back to clear stuck operation..."
+                helm rollback alert-service -n "$NS" --wait --timeout 5m
+                ;;
+            esac
           fi
 
       - name: Deploy with Helm
@@ -544,8 +556,14 @@ jobs:
       - name: Clear stuck Helm release (if any)
         run: |
           if helm list -n ai-monitoring 2>/dev/null | grep -q alert-service; then
-            helm rollback alert-service -n ai-monitoring 2>/dev/null || true
-            sleep 5
+            STATUS=$(helm status alert-service -n ai-monitoring 2>/dev/null | awk '/^STATUS:/{print $2}')
+            echo "Helm release status: ${STATUS:-unknown}"
+            case "$STATUS" in
+              pending-install|pending-upgrade|pending-rollback)
+                echo "Rolling back to clear stuck operation..."
+                helm rollback alert-service -n ai-monitoring --wait --timeout 5m
+                ;;
+            esac
           fi
 
       - name: Deploy with Helm
