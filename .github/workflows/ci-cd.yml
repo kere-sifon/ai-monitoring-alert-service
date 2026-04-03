@@ -333,8 +333,7 @@ jobs:
       - name: Ensure ai-monitoring-secrets exists
         run: |
           if ! kubectl get secret ai-monitoring-secrets -n ai-monitoring 2>/dev/null; then
-            echo "::error::Secret ai-monitoring-secrets not found. Run install-dependencies.sh first:"
-            echo "  DB_PASSWORD='<secure-password>' ./deployments/install-dependencies.sh"
+            echo "::error::Secret ai-monitoring-secrets not found. Install platform deps from the infrastructure repo (deployments/install-dependencies.sh) first."
             exit 1
           fi
           echo "Secret ai-monitoring-secrets exists."
@@ -538,8 +537,7 @@ jobs:
       - name: Ensure ai-monitoring-secrets exists
         run: |
           if ! kubectl get secret ai-monitoring-secrets -n ai-monitoring 2>/dev/null; then
-            echo "::error::Secret ai-monitoring-secrets not found. Run install-dependencies.sh first:"
-            echo "  DB_PASSWORD='<secure-password>' ./deployments/install-dependencies.sh"
+            echo "::error::Secret ai-monitoring-secrets not found. Install platform deps from the infrastructure repo (deployments/install-dependencies.sh) first."
             exit 1
           fi
 
